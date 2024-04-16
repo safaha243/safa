@@ -1,0 +1,65 @@
+function fetchAllRecordsFromAirtable($apiUrl, $authorizationHeader) {
+    $allRecords = array();
+
+    do {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => '{
+                "fields": [
+                    "fldg512V0sAhDuO2Y",
+                    "fldYIHkb9VTHmUfEK",
+                    "fldBnkZQR2tc2OSRe",
+                    "fldWazbqTnIHie85X",
+                    "fldzcYVJoVrurF3Ci",
+                    "fldeFSnZR89jrxHd2",
+                    "fldX1LFm2JHtzTbJy",
+                    "fld8sFXpDw83thLXf",
+                    "fldAYTFVC6kS9CpJg",
+                    "fldCABNmcQ1C52hJc"
+                ],
+                "offset": "' . (isset($offset) ? $offset : '') . '"
+            }',
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: ' . $authorizationHeader,
+                'Content-Type: application/json'
+            ),
+            CURLOPT_SSL_VERIFYPEER => false
+        ));
+
+        $response = curl_exec($curl);
+        $error = curl_error($curl); 
+        $info = curl_getinfo($curl);
+
+        curl_close($curl);
+
+        if ($response === false) {
+            return false;
+        }
+
+        $responseData = json_decode($response, true);
+
+        if (isset($responseData['records'])) {
+         
+            foreach ($responseData['records'] as $record) {
+                $allRecords[] = $record;
+            }
+        }
+
+        $offset = isset($responseData['offset']) ? $responseData['offset'] : null;
+       
+        
+
+    } while ($offset !== null);
+    
+
+    return $allRecords;
+}
